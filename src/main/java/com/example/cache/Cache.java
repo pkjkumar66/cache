@@ -4,21 +4,23 @@ package com.example.cache;
 import com.example.cache.exception.NotFoundException;
 import com.example.cache.exception.StorageFullException;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Cache<Key, Value> {
     private Storage<Key, Value> storage;
     private EvictionPolicy<Key> evictionPolicy;
-    private final Lock lock;
+    private final ConcurrentHashMap<Key, Lock> locks;
 
     public Cache(EvictionPolicy<Key> evictionPolicy, Integer capacity) {
         this.evictionPolicy = evictionPolicy;
         this.storage = new HashMapBasedStorage<>(capacity);
-        this.lock = new ReentrantLock();
+        this.locks = new ConcurrentHashMap<>();
     }
 
     void put(Key key, Value value) {
+        Lock lock = locks.computeIfAbsent(key, k -> new ReentrantLock());
         lock.lock();
         try {
             try {
@@ -43,6 +45,7 @@ public class Cache<Key, Value> {
     }
 
     Value get(Key key) {
+        Lock lock = locks.computeIfAbsent(key, k -> new ReentrantLock());
         lock.lock();
         try {
             try {
