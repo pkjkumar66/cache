@@ -1,0 +1,10 @@
+Problem: Design a cache System
+
+Requirements:
+    Functional:
+        - put
+        - get
+        - eviction policy: FIFO, LIFO, LRU, MRU, LFU, RR
+            - LRU: use doubly Linked list
+            - LFU: use min Heap (frequency, key), store address in map (key, node address)
+    Non-functional:
